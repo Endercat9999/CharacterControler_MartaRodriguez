@@ -55,8 +55,17 @@ public class PlayerControler : MonoBehaviour
             Jump();
         }
 
-        //Movement();
-        AimMovement();
+        
+       if(Input.GetButton("Fire2"))
+       {
+            AimMovement();
+       }
+       else
+       {
+            Movement();
+       }
+       
+        
         Gravity();
     }
 
