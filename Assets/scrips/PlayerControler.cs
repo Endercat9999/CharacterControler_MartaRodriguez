@@ -6,6 +6,7 @@ public class PlayerControler : MonoBehaviour
 {
     //---------------Componentes------------------------
     private CharacterController _controller;
+    private Transform _camera;
     //-----------------Imputs---------------------------
     private float _horizontal;
 
@@ -15,6 +16,9 @@ public class PlayerControler : MonoBehaviour
 
     private float _turnSmoothVelocity;
     [SerializeField] private float _turnSmoothTime = 0.5f;
+
+    [SerializeField] private float _jumpHeight = 1; 
+
    //------------Cosas Gravedad--------------------
     [SerializeField] private float _gravity = -9.81f; 
     [SerializeField] private Vector3 _playerGravity;
@@ -32,6 +36,7 @@ public class PlayerControler : MonoBehaviour
     void Awake()
     {
         _controller = GetComponent<CharacterController>();
+        _camera = Camera.main.transform;
     }
     // Start is called before the first frame update
     void Start()
@@ -45,7 +50,13 @@ public class PlayerControler : MonoBehaviour
         _horizontal = Input.GetAxis("Horizontal");
         _vertical = Input.GetAxis("Vertical");
 
-        Movement();
+        if(Input.GetButtonDown("Jump") && IsGrouded())
+        {
+            Jump();
+        }
+
+        //Movement();
+        AimMovement();
         Gravity();
     }
 
@@ -56,15 +67,42 @@ public class PlayerControler : MonoBehaviour
 
         if(direction !=Vector3.zero)
         {
-          float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+          float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
           float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
           transform.rotation = Quaternion.Euler(0, smoothAngle, 0);  
 
-          _controller.Move(direction * _movementSpeed * Time.deltaTime);
+          Vector3 moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+
+          _controller.Move(moveDirecion * _movementSpeed * Time.deltaTime);
 
 
 
         }
+        
+
+    }
+
+
+     void AimMovement()
+    {
+        Vector3 direction = new Vector3(_horizontal, 0, _vertical);
+
+        
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
+        float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, _camera.eulerAngles.y, ref _turnSmoothVelocity, _turnSmoothTime);
+        transform.rotation = Quaternion.Euler(0, smoothAngle, 0);  
+
+        if(direction != Vector3.zero)
+        {
+           Vector3 moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+
+            _controller.Move(moveDirecion * _movementSpeed * Time.deltaTime); 
+        }
+        
+
+
+
+        
         
 
     }
@@ -82,6 +120,11 @@ public class PlayerControler : MonoBehaviour
         
 
         _controller.Move(_playerGravity * Time.deltaTime);
+    }
+
+    void Jump()
+    {
+        _playerGravity.y = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
     }
 
     bool IsGrouded()
