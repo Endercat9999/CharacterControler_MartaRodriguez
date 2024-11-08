@@ -13,6 +13,7 @@ public class PlayerControler : MonoBehaviour
     private float _vertical; 
 
     [SerializeField] private float _movementSpeed = 5;
+    [SerializeField] private float _pushForce = 10; 
 
     private float _turnSmoothVelocity;
     [SerializeField] private float _turnSmoothTime = 0.5f;
@@ -27,6 +28,8 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] LayerMask _groundLayer;
     [SerializeField] Transform _sensorPosition;
     [SerializeField] float _sensorRadius = 0.5f;
+
+    private Vector3 moveDirecion; 
 
 
 
@@ -67,6 +70,11 @@ public class PlayerControler : MonoBehaviour
        
         
         Gravity();
+
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            RayTest();
+        }
     }
 
 
@@ -80,7 +88,7 @@ public class PlayerControler : MonoBehaviour
           float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _turnSmoothVelocity, _turnSmoothTime);
           transform.rotation = Quaternion.Euler(0, smoothAngle, 0);  
 
-          Vector3 moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+            moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
 
           _controller.Move(moveDirecion * _movementSpeed * Time.deltaTime);
 
@@ -103,7 +111,7 @@ public class PlayerControler : MonoBehaviour
 
         if(direction != Vector3.zero)
         {
-           Vector3 moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+            moveDirecion = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
 
             _controller.Move(moveDirecion * _movementSpeed * Time.deltaTime); 
         }
@@ -136,12 +144,68 @@ public class PlayerControler : MonoBehaviour
         _playerGravity.y = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
     }
 
+    /*bool InGrounded()
+    {
+        
+        return Physics.CheckSphere(_sensorPosition.position, _sensorRadius, _groundLayer);
+        
+
+    }*/
+
+
     bool IsGrouded()
     {
-       
-       return Physics.CheckSphere(_sensorPosition.position, _sensorRadius, _groundLayer);
-       
 
+        RaycastHit hit;
+        if(Physics.Raycast(_sensorPosition.position, -transform.up, out hit, 2))
+        {
+            if(hit.transform.gameObject.layer == 6)
+            {
+                Debug.DrawRay(_sensorPosition.position, -transform.up * 2, Color.green);
+                return true;
+            }
+            else
+            {
+                Debug.DrawRay(_sensorPosition.position, -transform.up * 2, Color.red);
+                return false;
+            }
+        }
+        else
+        {
+            return false; 
+        }
+        
+    }
+    
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Rigidbody rBody = hit.collider.attachedRigidbody;
+
+        if(rBody != null)
+        {
+            Vector3 pushDirection = new Vector3(moveDirecion.x, 0, moveDirecion.z); 
+
+            rBody.velocity = pushDirection * _pushForce; 
+        }
+    }
+
+    void RayTest()
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(transform.position, transform.forward, out hit, 10))
+        {
+            Debug.Log(hit.transform.name);
+            Debug.Log(hit.transform.position);
+            Debug.Log(hit.transform.gameObject.layer);
+
+            if(hit.transform.gameObject.tag == "Enemy")
+            {
+                Enemy enemyScript = hit.transform.gameObject.GetComponent<Enemy>();
+
+                enemyScript.TakeDamage();
+            }
+        }
     }
 
     void OnDrawGizmos()
