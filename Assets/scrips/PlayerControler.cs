@@ -144,16 +144,16 @@ public class PlayerControler : MonoBehaviour
         _playerGravity.y = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
     }
 
-    /*bool InGrounded()
+    bool IsGrouded()
     {
         
         return Physics.CheckSphere(_sensorPosition.position, _sensorRadius, _groundLayer);
         
 
-    }*/
+    }
 
 
-    bool IsGrouded()
+    /*bool IsGrouded()
     {
 
         RaycastHit hit;
@@ -175,7 +175,7 @@ public class PlayerControler : MonoBehaviour
             return false; 
         }
         
-    }
+    }*/
     
 
     void OnControllerColliderHit(ControllerColliderHit hit)
