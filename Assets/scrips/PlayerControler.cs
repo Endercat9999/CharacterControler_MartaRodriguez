@@ -150,6 +150,7 @@ public class PlayerControler : MonoBehaviour
     void Jump()
     {
         _playerGravity.y = Mathf.Sqrt(_jumpHeight * -2 * _gravity);
+        
     }
 
     bool IsGrouded()
