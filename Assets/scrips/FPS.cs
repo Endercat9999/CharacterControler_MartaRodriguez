@@ -74,7 +74,10 @@ public class FPS : MonoBehaviour
 
         _camera.localRotation = Quaternion.Euler(_xRotation, 0, 0);
 
-        transform.rotation = Quaternion.Euler(0, _yRotation, 0);
+        transform.Rotate(Vector3.up * mouseX);
+
+        Vector3 move = transform.right * _horizontal + transform.forward * _vertical;
+        _controller.Move(move * _movementSpeed * Time.deltaTime);
     }
 
 
