@@ -7,6 +7,7 @@ public class PlayerControler : MonoBehaviour
     //---------------Componentes------------------------
     private CharacterController _controller;
     private Transform _camera;
+    private Animator _animator;
     //-----------------Imputs---------------------------
     private float _horizontal;
 
@@ -40,6 +41,7 @@ public class PlayerControler : MonoBehaviour
     {
         _controller = GetComponent<CharacterController>();
         _camera = Camera.main.transform;
+        _animator = GetComponentInChildren<Animator>();
     }
     // Start is called before the first frame update
     void Start()
@@ -82,6 +84,9 @@ public class PlayerControler : MonoBehaviour
     {
         Vector3 direction = new Vector3(_horizontal, 0, _vertical);
 
+        _animator.SetFloat("VelZ", direction.magnitude);
+        _animator.SetFloat("VelX", 0);
+
         if(direction !=Vector3.zero)
         {
           float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
@@ -100,9 +105,12 @@ public class PlayerControler : MonoBehaviour
     }
 
 
-     void AimMovement()
+    void AimMovement()
     {
         Vector3 direction = new Vector3(_horizontal, 0, _vertical);
+
+        _animator.SetFloat("VelZ", _vertical);
+        _animator.SetFloat("VelX", _horizontal);
 
         
         float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y;
